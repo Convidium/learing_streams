@@ -1,0 +1,24 @@
+{
+  "name": "learing_streams",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Convidium/learing_streams#readme",
+  "bugs": {
+    "url": "https://github.com/Convidium/learing_streams/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Convidium/learing_streams.git"
+  },
+  "license": "ISC",
+  "author": "Convidium",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "fastify": "^5.7.4"
+  }
+}
