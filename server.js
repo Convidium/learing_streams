@@ -1,7 +1,9 @@
 import fastify from "fastify";
-import fs from "node:fs"
+import fs, { read } from "node:fs"
 import path from "node:path"
 import { pipeline } from "node:stream/promises";
+
+// 1. First implementation
 
 /* This approach is not perfect. In this particular case, it works fine, since our readStream and writeStream have exact same characteristics. 
 They can process same amount of data, so there's no problem with so called "backpressuring". 
@@ -18,27 +20,53 @@ We recieve buffer from a memory, and send it to be written at certain disk space
 
 The issues occur, when writeStream writes data slower than the readStream recieves it and sends it to writeStream.
 If readStream sends buffer chunk to writeStream, but it is still busy with the previous chunk - it leaves it in RAM, 
-and so we now have a waitlist of buffer chunks to be sent via writeStream.
+and so we now have a waitlist of buffer chunks to be sent via writeStream (highWaterMark).
 And what happens if we read from a file way faster than we write to the other file? And the initial file size is way larger than what RAM could contain?
 Well, as we place chunk and another chunk in RAM, at some point or RAM is full of chunks. We now don't have a place to store it in memory.
 This is Heap out of Memory error.  
 */
+
+// const main = async () => {
+//     const readStream = fs.createReadStream("./test/customers.csv");
+
+//     const writeStream = fs.createWriteStream("./test/exported-customers.csv");
+
+//     readStream.on("data", (buffer) => {
+//         console.log("Data:\n", buffer.toString())
+
+//         writeStream.write(buffer)
+//     })
+
+//     readStream.on("end", () => {
+//         console.log("Stream ended");
+
+//         writeStream.end();
+//     })
+// }
+
+
+
+
+
+
+
+// 2. Second Implementation
 
 const main = async () => {
     const readStream = fs.createReadStream("./test/customers.csv");
 
     const writeStream = fs.createWriteStream("./test/exported-customers.csv");
 
-    readStream.on("data", (buffer) => {
-        console.log("Data:\n", buffer.toString())
-
-        writeStream.write(buffer)
-    })
+    readStream.pipe(
+        writeStream
+    )
 
     readStream.on("end", () => {
-        console.log("Stream ended");
+        console.log("Stream Ended");
+    });
 
-        writeStream.end();
+    writeStream.on("finish", () => {
+        console.log("Write stream Finished")
     })
 }
 

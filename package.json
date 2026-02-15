@@ -19,6 +19,7 @@
     "dev": "node server.js"
   },
   "dependencies": {
+    "csvtojson": "^2.0.14",
     "fastify": "^5.7.4"
   }
 }
