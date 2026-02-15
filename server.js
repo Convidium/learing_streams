@@ -50,7 +50,12 @@ This is Heap out of Memory error.
 
 
 
+/* This is a better way to work with streams, but again - not perfect. Now, while our writeStream is busy,
+we stop recieving chunks of data from our readStream. So now we solved a problem of heap running out of memory.
 
+But there's another problem. Error handling. With this approach, we can't really handle errors that occur within our pipes, 
+since it doesn't pass them through. There's a workaround, we can just write a scenario for each case, but that's going to take a lot of code.
+(See Cleanup Logic) */
 
 // 2. Second Implementation
 
