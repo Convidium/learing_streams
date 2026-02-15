@@ -1,7 +1,9 @@
 import fastify from "fastify";
 import fs, { read } from "node:fs"
-import path from "node:path"
+import path, { delimiter } from "node:path"
 import { pipeline } from "node:stream/promises";
+import csv from "csvtojson";
+import { Transform } from "node:stream";
 
 // 1. First implementation
 
@@ -54,20 +56,33 @@ This is Heap out of Memory error.
 
 const main = async () => {
     const readStream = fs.createReadStream("./test/customers.csv");
-
     const writeStream = fs.createWriteStream("./test/exported-customers.csv");
 
-    readStream.pipe(
-        writeStream
-    )
+    readStream.on("error", (err) => {
+        console.error("Error: ", err.message);
+        writeStream.end();
+    })
 
-    readStream.on("end", () => {
-        console.log("Stream Ended");
+    writeStream.on("error", (err) => {
+        console.error("Error: ", err.message);
+        readStream.end();
+    })
+
+    readStream.on("data", chunk => {
+            const canWriteMore = writeStream.write(chunk);
+
+            if (!canWriteMore) {
+                readStream.pause();
+           }
+    })
+
+    writeStream.on('drain', () => {
+        readStream.resume();
     });
 
-    writeStream.on("finish", () => {
-        console.log("Write stream Finished")
-    })
+    readStream.on("end", () => {
+        writeStream.end();
+    });
 }
 
 main();
