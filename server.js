@@ -64,23 +64,54 @@ UPD. I actually added .pipe this time. Same functionality, but less code - .pipe
 But the problem with error handling remains. 
 */
 
-// 2. Second Implementation
+// 2. Second Implementation: using .pipe()
+
+// const main = async () => {
+//     const readStream = fs.createReadStream("./test/customers.csv");
+//     const writeStream = fs.createWriteStream("./test/exported-customers.csv");
+
+//     readStream.on("error", (err) => {
+//         console.error("Error: ", err.message);
+//         writeStream.end();
+//     })
+
+//     writeStream.on("error", (err) => {
+//         console.error("Error: ", err.message);
+//         readStream.end();
+//     })
+
+//     readStream.pipe(writeStream)
+// }
+
+// main();
+
+
+
+
+
+/*
+So apparently, this is the best approach. We handle errors, and we regulate the pressure that's been put ot readStream, writeStream.
+.pipeline() does everything for us, This is the standart practice for current Node.js version. Using .pipeline() instead of .pipe() is strongly advised.
+*/
+
+/*
+3. Third Implementation: using .pipeline().
+*/
 
 const main = async () => {
     const readStream = fs.createReadStream("./test/customers.csv");
     const writeStream = fs.createWriteStream("./test/exported-customers.csv");
 
-    readStream.on("error", (err) => {
-        console.error("Error: ", err.message);
-        writeStream.end();
-    })
+    try {
+        await pipeline(
+            readStream,
+            writeStream
+        )
+    } catch (err) {
+        console.log("There's an error:", err)
+    }
 
-    writeStream.on("error", (err) => {
-        console.error("Error: ", err.message);
-        readStream.end();
-    })
-
-    readStream.pipe(writeStream)
+    console.log("Stream ended");
 }
 
 main();
