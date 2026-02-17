@@ -17,7 +17,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node server.js",
-    "run:copy": "node src/01-basics/copy-file.js"
+    "run:copy": "node src/01-basics/copy-file.js",
+    "run:transform": "node src/02-csv-to-json/csv-to-json.js"
   },
   "dependencies": {
     "csvtojson": "^2.0.14",

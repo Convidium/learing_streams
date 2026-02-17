@@ -17,7 +17,7 @@ const main = async () => {
     // }
 
     // console.log("Stream ended");
-    // generateCSV("data/output/random.csv", (100 * 1024 * 1024).toString());
+    generateCSV("data/output/random.csv", (1 * 1024 * 1024).toString());
     // await cleanData("./data/output/random.csv");
 }
 

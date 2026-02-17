@@ -19,10 +19,13 @@ const generateCSV = async (filePath, targetSizeBytes) => {
     while (currentSizeBytes < targetSizeBytes) {
         const id = idCounter++;
         const name = `User_${id}`;
-        const age = Math.random() * 99;
+        const age = Math.round(Math.random() * 99);
         const email = `user${id}@gmail.com`;
 
-        const string = [id, name, age, email].join(",") + "\n";
+        const isLastLine = currentSizeBytes + Buffer.byteLength([id, name, age, email].join(",")) >= targetSizeBytes;
+        const string = isLastLine 
+            ? [id, name, age, email].join(",") 
+            : ([id, name, age, email].join(",") + "\n");
 
         const canWrite = writeStream.write(string);
 
