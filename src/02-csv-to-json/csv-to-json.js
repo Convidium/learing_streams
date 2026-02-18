@@ -6,14 +6,13 @@ const main = async () => {
     const readStream = fs.createReadStream("data/output/random.csv");
     const writeStream = fs.createWriteStream("data/output/clean.json");
 
-    const csvToJSONTransformer = new Transform({
+    const csvToObjectStream = new Transform({
         readableObjectMode: true,
         writableObjectMode: true,
 
         construct(callback) {
-            this.remainder = "",
+            this.remainder = "";
             this.headers = null;
-            this.isFirstObject = true;
             callback();
         },
 
@@ -28,7 +27,6 @@ const main = async () => {
 
                 if (!this.headers) {
                     this.headers = values;
-                    this.push("[\n");
                     return;
                 }
 
@@ -38,17 +36,48 @@ const main = async () => {
                         obj[header.trim()] = values[index].trim();
                     });
 
-                    const jsonString = JSON.stringify(obj, null, 2);
+                    this.push(obj);
+                }
+            });
+            callback();
+        }
+    });
 
+    const ageFilterStream = new Transform({
+        readableObjectMode: true,
+        writableObjectMode: true,
+
+        construct(callback) {
+            this.minAge = 18;
+            callback();
+        },
+
+        transform(user, encoding, callback) {
+            const userAge = parseInt(user.age);
+            if (userAge >= this.minAge) {
+                this.push(user);
+            }
+            callback();
+        }
+    });
+
+    const JSONStringifyStream = new Transform({
+        readableObjectMode: true,
+        writableObjectMode: true,
+
+        construct(callback) {
+            this.isFirstObject = true;
+            callback();
+        },
+
+        transform(user, encoding, callback) {
+            const jsonString = JSON.stringify(user, null, 2);
                     if (this.isFirstObject) {
-                        this.push('  ' + jsonString);
+                        this.push('[\n  ' + jsonString);
                         this.isFirstObject = false;
                     } else {
                         this.push(',\n  ' + jsonString);
                     }
-                }
-            });
-
             callback();
         },
 
@@ -56,12 +85,15 @@ const main = async () => {
             this.push("\n]")
             callback();
         }
+        
     });
 
     try {
         await pipeline(
             readStream,
-            csvToJSONTransformer,
+            csvToObjectStream,
+            ageFilterStream,
+            JSONStringifyStream,
             writeStream
         );
     } catch (err) {
